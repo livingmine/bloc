@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todos_app_core/todos_app_core.dart';
 import 'package:flutter_todos/models/models.dart';
+
+import '../blocs/blocs.dart';
 
 typedef OnSaveCallback = Function(String task, String note);
 
@@ -40,38 +43,50 @@ class _AddEditScreenState extends State<AddEditScreen> {
           isEditing ? localizations.editTodo : localizations.addTodo,
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                initialValue: isEditing ? widget.todo.task : '',
-                key: ArchSampleKeys.taskField,
-                autofocus: !isEditing,
-                style: textTheme.headline,
-                decoration: InputDecoration(
-                  hintText: localizations.newTodoHint,
-                ),
-                validator: (val) {
-                  return val.trim().isEmpty
-                      ? localizations.emptyTodoError
-                      : null;
-                },
-                onSaved: (value) => _task = value,
+      body: BlocListener<TodosBloc, TodosState>(
+        listener: (context, state) {
+          if (state is TodosLoaded) {
+            Scaffold.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Colors.green,
+                content: Text('Success'),
               ),
-              TextFormField(
-                initialValue: isEditing ? widget.todo.note : '',
-                key: ArchSampleKeys.noteField,
-                maxLines: 10,
-                style: textTheme.subhead,
-                decoration: InputDecoration(
-                  hintText: localizations.notesHint,
+            );
+          }
+        },
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                TextFormField(
+                  initialValue: isEditing ? widget.todo.task : '',
+                  key: ArchSampleKeys.taskField,
+                  autofocus: !isEditing,
+                  style: textTheme.headline,
+                  decoration: InputDecoration(
+                    hintText: localizations.newTodoHint,
+                  ),
+                  validator: (val) {
+                    return val.trim().isEmpty
+                        ? localizations.emptyTodoError
+                        : null;
+                  },
+                  onSaved: (value) => _task = value,
                 ),
-                onSaved: (value) => _note = value,
-              )
-            ],
+                TextFormField(
+                  initialValue: isEditing ? widget.todo.note : '',
+                  key: ArchSampleKeys.noteField,
+                  maxLines: 10,
+                  style: textTheme.subhead,
+                  decoration: InputDecoration(
+                    hintText: localizations.notesHint,
+                  ),
+                  onSaved: (value) => _note = value,
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -84,7 +99,7 @@ class _AddEditScreenState extends State<AddEditScreen> {
           if (_formKey.currentState.validate()) {
             _formKey.currentState.save();
             widget.onSave(_task, _note);
-            Navigator.pop(context);
+//            Navigator.pop(context);
           }
         },
       ),

@@ -49,9 +49,17 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
       final List<Todo> updatedTodos = List.from((state as TodosLoaded).todos)
         ..add(event.todo);
 
-      return Stream
+      final savedTodosStream = Stream
           .fromFuture(_saveTodos(updatedTodos))
           .map((_) => TodosLoaded(updatedTodos));
+
+      final resetStream = savedTodosStream.map((_) => TodosInitial());
+
+
+      return Rx.merge([
+        savedTodosStream,
+//        resetStream
+      ]);
     });
   }
 
